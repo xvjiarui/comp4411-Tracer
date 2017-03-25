@@ -8,6 +8,8 @@
 #include "scene/ray.h"
 #include "fileio/read.h"
 #include "fileio/parse.h"
+#include "ui/TraceUI.h"
+extern TraceUI* traceUI;
 
 // Trace a top-level ray through normalized window coordinates (x,y)
 // through the projection plane, and out into the scene.  All we do is
@@ -17,7 +19,7 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), 0 ).clamp();
+	return traceRay( scene, r, vec3f(1.0,1.0,1.0), traceUI->getDepth() ).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
@@ -27,7 +29,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 {
 	isect i;
 
-	if( scene->intersect( r, i ) ) {
+	if( scene->intersect( r, i ) && depth >=0) {
 		// YOUR CODE HERE
 
 		// An intersection occured!  We've got work to do.  For now,
@@ -38,9 +40,12 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// Instead of just returning the result of shade(), add some
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
-
 		const Material& m = i.getMaterial();
-		return m.shade(scene, r, i);
+		vec3f Intensity = m.shade(scene, r, i);
+		vec3f reflection = 2 * ((-r.getDirection().dot(i.N)) * i.N) + r.getDirection();
+		ray reflection_ray = ray(r.at(i.t), reflection.normalize());
+		Intensity += prod(m.kr,traceRay(scene, reflection_ray, vec3f(1.0,1.0,1.0), depth - 1));
+		return Intensity;
 	
 	} else {
 		// No intersection.  This ray travels to infinity, so we color

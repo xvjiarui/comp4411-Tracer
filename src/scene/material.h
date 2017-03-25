@@ -3,12 +3,10 @@
 //
 // The Material class: a description of the phsyical properties of a surface
 // that are used to determine how that surface interacts with light.
-
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
 
 #include "../vecmath/vecmath.h"
-
 class Scene;
 class ray;
 class isect;
