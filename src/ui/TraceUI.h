@@ -28,9 +28,17 @@ public:
 
 	Fl_Slider*			m_sizeSlider;
 	Fl_Slider*			m_depthSlider;
+	Fl_Slider* 			m_AttenuationConstantSlider;
+	Fl_Slider* 			m_AttenuationLinearSlider;
+	Fl_Slider* 			m_AttenuationQuadraticSlider;
+	Fl_Slider*			m_AmbientLightSlider;
+	Fl_Slider* 			m_IntensitySlider;
+	Fl_Slider* 			m_DistanceSlider;
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;
+
+	Fl_Light_Button*	m_fresnelSwitch;
 
 	TraceGLWindow*		m_traceGlWindow;
 
@@ -47,6 +55,7 @@ public:
 	double 		getAmbientLight();
 	int 		getIntensity();
 	double		getDistance();
+	bool 		isEnableFresnel();
 
 private:
 	RayTracer*	raytracer;
@@ -59,6 +68,7 @@ private:
 	double		m_dAmbientLight;
 	int 		m_nIntensity;
 	double 		m_nDistance;
+	bool 		m_bIsEnableFresnel;
 
 // static class members
 	static Fl_Menu_Item menuitems[];
@@ -80,6 +90,7 @@ private:
 	static void cb_ambientLightSlides(Fl_Widget* o, void* v);
 	static void cb_intensitySlides(Fl_Widget* o, void* v);
 	static void cb_distanceSlides(Fl_Widget* o, void* v);
+	static void cb_fresnelSwitch(Fl_Widget* o, void* v);
 
 
 	static void cb_render(Fl_Widget* o, void* v);

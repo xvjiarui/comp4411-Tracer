@@ -5,6 +5,7 @@
 
 #include "scene/scene.h"
 #include "scene/ray.h"
+#include <map>
 
 class RayTracer
 {
@@ -25,13 +26,14 @@ public:
 	bool loadScene( char* fn );
 
 	bool sceneLoaded();
+	double getFresnelCoeff(isect& i, const ray& r);
 
 private:
 	unsigned char *buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
 	Scene *scene;
-
+	std::map<int, Material> mediaHistory;
 	bool m_bSceneLoaded;
 };
 

@@ -129,6 +129,11 @@ void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
 }
 
+void TraceUI::cb_fresnelSwitch(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_bIsEnableFresnel ^= true;
+}
+
 void TraceUI::cb_render(Fl_Widget* o, void* v)
 {
 	char buffer[256];
@@ -262,6 +267,10 @@ double TraceUI::getDistance()
 	return m_nDistance;
 }
 
+bool TraceUI::isEnableFresnel()
+{
+	return m_bIsEnableFresnel;
+}
 
 // menu definition
 Fl_Menu_Item TraceUI::menuitems[] = {
@@ -288,6 +297,7 @@ TraceUI::TraceUI() {
 	m_dAmbientLight = 0.20;
 	m_nIntensity = 1;
 	m_nDistance = 1.87;
+	m_bIsEnableFresnel = false;
 	m_mainWindow = new Fl_Window(100, 40, 400, 350, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
@@ -320,6 +330,84 @@ TraceUI::TraceUI() {
 		m_sizeSlider->align(FL_ALIGN_RIGHT);
 		m_sizeSlider->callback(cb_sizeSlides);
 
+		// install slider size
+		m_AttenuationConstantSlider = new Fl_Value_Slider(10, 80, 180, 20, "Attenuation, Constant");
+		m_AttenuationConstantSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_AttenuationConstantSlider->type(FL_HOR_NICE_SLIDER);
+        m_AttenuationConstantSlider->labelfont(FL_COURIER);
+        m_AttenuationConstantSlider->labelsize(12);
+		m_AttenuationConstantSlider->minimum(0);
+		m_AttenuationConstantSlider->maximum(1);
+		m_AttenuationConstantSlider->step(0.01);
+		m_AttenuationConstantSlider->value(m_dAttenuationConstant);
+		m_AttenuationConstantSlider->align(FL_ALIGN_RIGHT);
+		m_AttenuationConstantSlider->callback(cb_attenuationConstantSlides);
+
+		// install slider size
+		m_AttenuationLinearSlider = new Fl_Value_Slider(10, 105, 180, 20, "Attenuation, Linear");
+		m_AttenuationLinearSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_AttenuationLinearSlider->type(FL_HOR_NICE_SLIDER);
+        m_AttenuationLinearSlider->labelfont(FL_COURIER);
+        m_AttenuationLinearSlider->labelsize(12);
+		m_AttenuationLinearSlider->minimum(0);
+		m_AttenuationLinearSlider->maximum(1);
+		m_AttenuationLinearSlider->step(0.01);
+		m_AttenuationLinearSlider->value(m_dAttenuationLinear);
+		m_AttenuationLinearSlider->align(FL_ALIGN_RIGHT);
+		m_AttenuationLinearSlider->callback(cb_attenuationLinearSlides);
+
+		// install slider size
+		m_AttenuationQuadraticSlider = new Fl_Value_Slider(10, 130, 180, 20, "Attenuation, Quadratic");
+		m_AttenuationQuadraticSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_AttenuationQuadraticSlider->type(FL_HOR_NICE_SLIDER);
+        m_AttenuationQuadraticSlider->labelfont(FL_COURIER);
+        m_AttenuationQuadraticSlider->labelsize(12);
+		m_AttenuationQuadraticSlider->minimum(0);
+		m_AttenuationQuadraticSlider->maximum(1);
+		m_AttenuationQuadraticSlider->step(0.01);
+		m_AttenuationQuadraticSlider->value(m_dAttenuationQuadratic);
+		m_AttenuationQuadraticSlider->align(FL_ALIGN_RIGHT);
+		m_AttenuationQuadraticSlider->callback(cb_attenuationQuadraticSlides);
+
+		// install slider size
+		m_AmbientLightSlider = new Fl_Value_Slider(10, 155, 180, 20, "Ambient Light");
+		m_AmbientLightSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_AmbientLightSlider->type(FL_HOR_NICE_SLIDER);
+        m_AmbientLightSlider->labelfont(FL_COURIER);
+        m_AmbientLightSlider->labelsize(12);
+		m_AmbientLightSlider->minimum(0);
+		m_AmbientLightSlider->maximum(1);
+		m_AmbientLightSlider->step(0.01);
+		m_AmbientLightSlider->value(m_dAmbientLight);
+		m_AmbientLightSlider->align(FL_ALIGN_RIGHT);
+		m_AmbientLightSlider->callback(cb_ambientLightSlides);
+
+		// install slider size
+		m_IntensitySlider = new Fl_Value_Slider(10, 180, 180, 20, "Intensity Scale");
+		m_IntensitySlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_IntensitySlider->type(FL_HOR_NICE_SLIDER);
+        m_IntensitySlider->labelfont(FL_COURIER);
+        m_IntensitySlider->labelsize(12);
+		m_IntensitySlider->minimum(1);
+		m_IntensitySlider->maximum(10);
+		m_IntensitySlider->step(1);
+		m_IntensitySlider->value(m_nIntensity);
+		m_IntensitySlider->align(FL_ALIGN_RIGHT);
+		m_IntensitySlider->callback(cb_intensitySlides);
+
+		// install slider size
+		m_DistanceSlider = new Fl_Value_Slider(10, 205, 180, 20, "Disntance Scale (LOG10)");
+		m_DistanceSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_DistanceSlider->type(FL_HOR_NICE_SLIDER);
+        m_DistanceSlider->labelfont(FL_COURIER);
+        m_DistanceSlider->labelsize(12);
+		m_DistanceSlider->minimum(0.0);
+		m_DistanceSlider->maximum(1.0);
+		m_DistanceSlider->step(0.01);
+		m_DistanceSlider->value(m_nDistance);
+		m_DistanceSlider->align(FL_ALIGN_RIGHT);
+		m_DistanceSlider->callback(cb_distanceSlides);
+
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));
 		m_renderButton->callback(cb_render);
@@ -328,83 +416,10 @@ TraceUI::TraceUI() {
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
 
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 80, 180, 20, "Attenuation, Constant");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(0);
-		m_sizeSlider->maximum(1);
-		m_sizeSlider->step(0.01);
-		m_sizeSlider->value(m_dAttenuationConstant);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_attenuationConstantSlides);
-
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 105, 180, 20, "Attenuation, Linear");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(0);
-		m_sizeSlider->maximum(1);
-		m_sizeSlider->step(0.01);
-		m_sizeSlider->value(m_dAttenuationLinear);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_attenuationLinearSlides);
-
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 130, 180, 20, "Attenuation, Quadratic");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(0);
-		m_sizeSlider->maximum(1);
-		m_sizeSlider->step(0.01);
-		m_sizeSlider->value(m_dAttenuationQuadratic);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_attenuationQuadraticSlides);
-
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 155, 180, 20, "Ambient Light");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(0);
-		m_sizeSlider->maximum(1);
-		m_sizeSlider->step(0.01);
-		m_sizeSlider->value(m_dAmbientLight);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_ambientLightSlides);
-
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 180, 180, 20, "Intensity Scale");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(1);
-		m_sizeSlider->maximum(10);
-		m_sizeSlider->step(1);
-		m_sizeSlider->value(m_nIntensity);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_intensitySlides);
-
-		// install slider size
-		m_sizeSlider = new Fl_Value_Slider(10, 205, 180, 20, "Disntance Scale (LOG10)");
-		m_sizeSlider->user_data((void*)(this));	// record self to be used by static callback functions
-		m_sizeSlider->type(FL_HOR_NICE_SLIDER);
-        m_sizeSlider->labelfont(FL_COURIER);
-        m_sizeSlider->labelsize(12);
-		m_sizeSlider->minimum(0.0);
-		m_sizeSlider->maximum(1.0);
-		m_sizeSlider->step(0.01);
-		m_sizeSlider->value(m_nDistance);
-		m_sizeSlider->align(FL_ALIGN_RIGHT);
-		m_sizeSlider->callback(cb_distanceSlides);
+		m_fresnelSwitch = new Fl_Light_Button(10, 240, 70, 25, "Fresnel");
+		m_fresnelSwitch->user_data((void*)(this));
+		m_fresnelSwitch->value(0);
+		m_fresnelSwitch->callback(cb_fresnelSwitch);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);
