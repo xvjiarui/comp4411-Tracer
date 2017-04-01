@@ -50,7 +50,14 @@ void TraceUI::cb_save_image(Fl_Menu_* o, void* v)
 		pUI->m_traceGlWindow->saveImage(savefile);
 	}
 }
-
+void TraceUI::cb_load_background_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI=whoami(o);
+	char* newfile = fl_file_chooser("Load Background Image?", "*.bmp", NULL );
+	if (newfile != NULL){
+		pUI->raytracer->loadbackgroundImage(newfile);
+	}
+}
 void TraceUI::cb_exit(Fl_Menu_* o, void* v)
 {
 	TraceUI* pUI=whoami(o);
@@ -299,6 +306,7 @@ Fl_Menu_Item TraceUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
 		{ "&Load Scene...",	FL_ALT + 'l', (Fl_Callback *)TraceUI::cb_load_scene },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)TraceUI::cb_save_image },
+		{ "&Load Background Image",	FL_ALT + 'k', (Fl_Callback *)TraceUI::cb_load_background_image },
 		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 

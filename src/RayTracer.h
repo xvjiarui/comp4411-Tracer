@@ -24,17 +24,22 @@ public:
 	void tracePixel( int i, int j );
 
 	bool loadScene( char* fn );
+	void loadbackgroundImage( char* fn);
+	vec3f getbackgroundLoc(double x, double y);
 
 	bool sceneLoaded();
 	double getFresnelCoeff(isect& i, const ray& r);
 
 private:
+	unsigned char *backgroundImage;
 	unsigned char *buffer;
 	int buffer_width, buffer_height;
 	int bufferSize;
+	int background_width, background_height;
 	Scene *scene;
 	std::map<int, Material> mediaHistory;
 	bool m_bSceneLoaded;
+	bool m_bBackgroundLoaded;
 };
 
 #endif // __RAYTRACER_H__

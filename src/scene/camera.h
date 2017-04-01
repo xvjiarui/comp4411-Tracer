@@ -13,6 +13,8 @@ public:
     void setLook( const vec3f &viewDir, const vec3f &upDir );
     void setFOV( double );
     void setAspectRatio( double );
+    double getnx();
+    double getny();
 
     double getAspectRatio() { return aspectRatio; }
 private:
@@ -24,7 +26,8 @@ private:
     
     vec3f eye;
     vec3f look;                  // direction to look
-    vec3f u,v;                   // u and v in the 
+    vec3f u,v; 
+    double nx,ny;                  // u and v in the 
 };
 
 #endif

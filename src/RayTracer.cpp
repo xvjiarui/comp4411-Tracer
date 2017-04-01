@@ -9,6 +9,7 @@
 #include "fileio/read.h"
 #include "fileio/parse.h"
 #include "ui/TraceUI.h"
+#include "fileio/bitmap.h"
 extern TraceUI* traceUI;
 
 // Trace a top-level ray through normalized window coordinates (x,y)
@@ -151,7 +152,10 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-
+		if (m_bBackgroundLoaded && depth==traceUI->getDepth())
+		{
+			return getbackgroundLoc(scene->getCamera()->getnx(),scene->getCamera()->getny());
+		}
 		return vec3f( 0.0, 0.0, 0.0 );
 	}
 }
@@ -163,6 +167,7 @@ RayTracer::RayTracer()
 	scene = NULL;
 
 	m_bSceneLoaded = false;
+	m_bBackgroundLoaded = false;
 }
 
 
@@ -218,6 +223,37 @@ bool RayTracer::loadScene( char* fn )
 	m_bSceneLoaded = true;
 
 	return true;
+}
+
+void RayTracer::loadbackgroundImage(char* fn){
+	unsigned char* data = NULL;
+	data = readBMP(fn, background_width, background_height);
+	if (data)
+	{
+		if (backgroundImage)
+		{
+			delete []backgroundImage;
+		}
+		m_bBackgroundLoaded=true;
+		backgroundImage=data;
+	}
+}
+
+vec3f RayTracer::getbackgroundLoc(double x, double y){
+	if (!m_bBackgroundLoaded)
+	{		
+		return vec3f(0.0,0.0,0.0);
+	}
+	if (x<0||x>=1||y<0||y>=1)
+	{
+		return vec3f(0.0,0.0,0.0);
+	}
+	int x1= x*background_width;
+	int y1= y*background_height;
+	double v1 = backgroundImage[(y1*background_width+x1)*3]/255.0;
+	double v2 = backgroundImage[(y1*background_width+x1)*3+1]/255.0;
+	double v3 = backgroundImage[(y1*background_width+x1)*3+2]/255.0;
+	return vec3f(v1,v2,v3);
 }
 
 void RayTracer::traceSetup( int w, int h )

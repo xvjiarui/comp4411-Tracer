@@ -19,6 +19,8 @@ Camera::rayThrough( double x, double y, ray &r )
 // Ray through normalized window point x,y.  In normalized coordinates
 // the camera's x and y vary both vary from 0 to 1.
 {
+    nx=x;
+    ny=y;
     x -= 0.5;
     y -= 0.5;
     vec3f dir = look + x * u + y * v;
@@ -89,6 +91,14 @@ Camera::update()
     u = m * vec3f( 1,0,0 ) * normalizedHeight*aspectRatio;
     v = m * vec3f( 0,1,0 ) * normalizedHeight;
     look = m * vec3f( 0,0,-1 );
+}
+
+double Camera::getnx(){
+    return nx;
+}
+
+double Camera::getny(){
+    return ny;
 }
 
 
