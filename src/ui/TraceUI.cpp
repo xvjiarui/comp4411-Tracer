@@ -124,6 +124,13 @@ void TraceUI::cb_distanceSlides(Fl_Widget* o, void* v)
 	pUI->m_nDepth=double( ((Fl_Slider *)o)->value() ) ;
 }
 
+void TraceUI::cb_antialiasingSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI=(TraceUI*)(o->user_data());
+	
+	pUI->m_nAntialiasingSize=int( ((Fl_Slider *)o)->value() ) ;
+}
+
 void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
@@ -132,6 +139,11 @@ void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 void TraceUI::cb_fresnelSwitch(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_bIsEnableFresnel ^= true;
+}
+
+void TraceUI::cb_jitteringSwitch(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_bIsEnableJittering ^= true;
 }
 
 void TraceUI::cb_render(Fl_Widget* o, void* v)
@@ -267,9 +279,19 @@ double TraceUI::getDistance()
 	return m_nDistance;
 }
 
+int TraceUI::getAntialiasingSize()
+{
+	return m_nAntialiasingSize;
+}
+
 bool TraceUI::isEnableFresnel()
 {
 	return m_bIsEnableFresnel;
+}
+
+bool TraceUI::isEnableJittering()
+{
+	return m_bIsEnableJittering;
 }
 
 // menu definition
@@ -297,7 +319,9 @@ TraceUI::TraceUI() {
 	m_dAmbientLight = 0.20;
 	m_nIntensity = 1;
 	m_nDistance = 1.87;
+	m_nAntialiasingSize = 0;
 	m_bIsEnableFresnel = false;
+	m_bIsEnableJittering = false;
 	m_mainWindow = new Fl_Window(100, 40, 400, 350, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
@@ -408,6 +432,20 @@ TraceUI::TraceUI() {
 		m_DistanceSlider->align(FL_ALIGN_RIGHT);
 		m_DistanceSlider->callback(cb_distanceSlides);
 
+		// install slider size
+		m_AntialiasingSlider = new Fl_Value_Slider(10, 230, 180, 20, "Antialiasing Size");
+		m_AntialiasingSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_AntialiasingSlider->type(FL_HOR_NICE_SLIDER);
+        m_AntialiasingSlider->labelfont(FL_COURIER);
+        m_AntialiasingSlider->labelsize(12);
+		m_AntialiasingSlider->minimum(0);
+		m_AntialiasingSlider->maximum(4);
+		m_AntialiasingSlider->step(1);
+		m_AntialiasingSlider->value(m_nAntialiasingSize);
+		m_AntialiasingSlider->align(FL_ALIGN_RIGHT);
+		m_AntialiasingSlider->callback(cb_antialiasingSlides);
+
+
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));
 		m_renderButton->callback(cb_render);
@@ -416,10 +454,15 @@ TraceUI::TraceUI() {
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
 
-		m_fresnelSwitch = new Fl_Light_Button(10, 240, 70, 25, "Fresnel");
+		m_fresnelSwitch = new Fl_Light_Button(10, 255, 70, 25, "Fresnel");
 		m_fresnelSwitch->user_data((void*)(this));
-		m_fresnelSwitch->value(0);
+		m_fresnelSwitch->value();
 		m_fresnelSwitch->callback(cb_fresnelSwitch);
+
+		m_jitteringSwitch = new Fl_Light_Button(10, 280, 70, 25, "Jittering");
+		m_jitteringSwitch->user_data((void*)(this));
+		m_jitteringSwitch->value(0);
+		m_jitteringSwitch->callback(cb_jitteringSwitch);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

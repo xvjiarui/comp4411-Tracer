@@ -255,10 +255,43 @@ void RayTracer::tracePixel( int i, int j )
 	if( !scene )
 		return;
 
-	double x = double(i)/double(buffer_width);
-	double y = double(j)/double(buffer_height);
+	// double x = double(i)/double(buffer_width);
+	// double y = double(j)/double(buffer_height);
+	if (traceUI->isEnableJittering())
+	{
+		double jitter_x = double(rand() % 10 - 5)/10.0;
+		double jitter_y = double(rand() % 10 - 5)/10.0;
+		double x = double(i + jitter_x)/double(buffer_width);
+		double y = double(j + jitter_y)/double(buffer_height);
+		col = trace( scene, x, y);
+	}
+	else
+	{
+		int range = traceUI->getAntialiasingSize();
+		if (range == 0)
+		{
+			double x = double(i)/double(buffer_width);
+			double y = double(j)/double(buffer_height);
+			col = trace( scene, x, y);
+		}
+		else 
+		{
+			for (int m = 0; m < range + 1; ++m)
+			{
+				double step = 1.0/range; 
+				for (int n = 0; n < range + 1; ++n)
+				{
+					double x = double(i - 0.5 + m * step)/double(buffer_width);
+					double y = double(j - 0.5 + n * step)/double(buffer_height);
+					col += trace( scene, x, y);
+				}
+			}
+			col = col / (range + 1) / (range + 1);
+		}
+	}
+	
+	// col = trace( scene,x,y );
 
-	col = trace( scene,x,y );
 
 	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
 
