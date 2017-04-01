@@ -58,6 +58,14 @@ void TraceUI::cb_load_background_image(Fl_Menu_* o, void* v)
 		pUI->raytracer->loadbackgroundImage(newfile);
 	}
 }
+void TraceUI::cb_load_texture_image(Fl_Menu_* o, void* v)
+{
+	TraceUI* pUI=whoami(o);
+	char* newfile = fl_file_chooser("Load Texture Image?", "*.bmp", NULL );
+	if (newfile != NULL){
+		pUI->raytracer->loadtextureMappingImage(newfile);
+	}
+}
 void TraceUI::cb_exit(Fl_Menu_* o, void* v)
 {
 	TraceUI* pUI=whoami(o);
@@ -151,6 +159,11 @@ void TraceUI::cb_fresnelSwitch(Fl_Widget* o, void* v)
 void TraceUI::cb_jitteringSwitch(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_bIsEnableJittering ^= true;
+}
+
+void TraceUI::cb_textureMappingSwitch(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_bIsEnableTextureMapping ^= true;
 }
 
 void TraceUI::cb_render(Fl_Widget* o, void* v)
@@ -301,12 +314,17 @@ bool TraceUI::isEnableJittering()
 	return m_bIsEnableJittering;
 }
 
+bool TraceUI::isEnableTextureMapping()
+{
+	return m_bIsEnableTextureMapping;
+}
 // menu definition
 Fl_Menu_Item TraceUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
 		{ "&Load Scene...",	FL_ALT + 'l', (Fl_Callback *)TraceUI::cb_load_scene },
 		{ "&Save Image...",	FL_ALT + 's', (Fl_Callback *)TraceUI::cb_save_image },
 		{ "&Load Background Image",	FL_ALT + 'k', (Fl_Callback *)TraceUI::cb_load_background_image },
+		{ "&Load Texture Image",	FL_ALT + 't', (Fl_Callback *)TraceUI::cb_load_texture_image },
 		{ "&Exit",			FL_ALT + 'e', (Fl_Callback *)TraceUI::cb_exit },
 		{ 0 },
 
@@ -330,6 +348,7 @@ TraceUI::TraceUI() {
 	m_nAntialiasingSize = 0;
 	m_bIsEnableFresnel = false;
 	m_bIsEnableJittering = false;
+	m_bIsEnableTextureMapping = false;
 	m_mainWindow = new Fl_Window(100, 40, 400, 350, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
@@ -471,6 +490,11 @@ TraceUI::TraceUI() {
 		m_jitteringSwitch->user_data((void*)(this));
 		m_jitteringSwitch->value(0);
 		m_jitteringSwitch->callback(cb_jitteringSwitch);
+
+		m_textureMappingSwitch = new Fl_Light_Button(70, 255, 70, 25, "Texture");
+		m_textureMappingSwitch->user_data((void*)(this));
+		m_textureMappingSwitch->value(0);
+		m_textureMappingSwitch->callback(cb_textureMappingSwitch);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

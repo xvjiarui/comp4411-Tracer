@@ -10,6 +10,7 @@
 #include "fileio/parse.h"
 #include "ui/TraceUI.h"
 #include "fileio/bitmap.h"
+#include "math.h"
 extern TraceUI* traceUI;
 
 // Trace a top-level ray through normalized window coordinates (x,y)
@@ -41,6 +42,11 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// Instead of just returning the result of shade(), add some
 		// more steps: add in the contributions from reflected and refracted
 		// rays.
+
+		if (traceUI->isEnableTextureMapping())
+		{
+			return SphereInverse(r, i);
+		}
 		const Material& m = i.getMaterial();
 		vec3f Intensity = m.shade(scene, r, i);
 		vec3f reflection = 2 * ((-r.getDirection().dot(i.N)) * i.N) + r.getDirection();
@@ -152,9 +158,9 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		// No intersection.  This ray travels to infinity, so we color
 		// it according to the background color, which in this (simple) case
 		// is just black.
-		if (m_bBackgroundLoaded && depth==traceUI->getDepth())
+		if (backgroundImage && depth==traceUI->getDepth())
 		{
-			return getbackgroundLoc(scene->getCamera()->getnx(),scene->getCamera()->getny());
+			return getbackgroundColor(scene->getCamera()->getnx(),scene->getCamera()->getny());
 		}
 		return vec3f( 0.0, 0.0, 0.0 );
 	}
@@ -167,7 +173,9 @@ RayTracer::RayTracer()
 	scene = NULL;
 
 	m_bSceneLoaded = false;
-	m_bBackgroundLoaded = false;
+	backgroundImage = NULL;
+	textureMappingImage = NULL;
+
 }
 
 
@@ -234,13 +242,25 @@ void RayTracer::loadbackgroundImage(char* fn){
 		{
 			delete []backgroundImage;
 		}
-		m_bBackgroundLoaded=true;
 		backgroundImage=data;
 	}
 }
 
-vec3f RayTracer::getbackgroundLoc(double x, double y){
-	if (!m_bBackgroundLoaded)
+void RayTracer::loadtextureMappingImage(char* fn){
+	unsigned char* data = NULL;
+	data = readBMP(fn, texture_width, texture_height);
+	if (data)
+	{
+		if (textureMappingImage)
+		{
+			delete []textureMappingImage;
+		}
+		textureMappingImage=data;
+	}
+}
+
+vec3f RayTracer::getbackgroundColor(double x, double y){
+	if (!backgroundImage)
 	{		
 		return vec3f(0.0,0.0,0.0);
 	}
@@ -253,6 +273,23 @@ vec3f RayTracer::getbackgroundLoc(double x, double y){
 	double v1 = backgroundImage[(y1*background_width+x1)*3]/255.0;
 	double v2 = backgroundImage[(y1*background_width+x1)*3+1]/255.0;
 	double v3 = backgroundImage[(y1*background_width+x1)*3+2]/255.0;
+	return vec3f(v1,v2,v3);
+}
+
+vec3f RayTracer::gettextureColor(double x, double y){
+	if (!textureMappingImage)
+	{		
+		return vec3f(0.0,0.0,0.0);
+	}
+	if (x<0||x>=1||y<0||y>=1)
+	{
+		return vec3f(0.0,0.0,0.0);
+	}
+	int x1= x*texture_width;
+	int y1= y*texture_height;
+	double v1 = textureMappingImage[(y1*texture_width+x1)*3]/255.0;
+	double v2 = textureMappingImage[(y1*texture_width+x1)*3+1]/255.0;
+	double v3 = textureMappingImage[(y1*texture_width+x1)*3+2]/255.0;
 	return vec3f(v1,v2,v3);
 }
 
@@ -414,4 +451,21 @@ double RayTracer::getFresnelCoeff(isect& i, const ray& r)
 	{
 		return 1.0;
 	}
+}
+vec3f RayTracer::SphereInverse(const ray& r, isect& i)
+{
+	vec3f Sp = vec3f(0, 1, 0);
+	vec3f Se = vec3f(1, 0, 0);
+	vec3f Sn = i.N.normalize();
+	double pipipi = 3.1415926535;
+	double phi = acos(-Sn.dot(Sp));
+	double v = phi/pipipi;
+	double theta = acos((Se.dot(Sn))/sin(phi))/2/pipipi;
+	double u = theta;
+	if (Sp.cross(Se).dot(Sn) <= 0)
+	{
+		u = 1- theta;
+	}
+	return gettextureColor(u, v);
+
 }

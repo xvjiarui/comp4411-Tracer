@@ -41,6 +41,7 @@ public:
 
 	Fl_Light_Button*	m_fresnelSwitch;
 	Fl_Light_Button* 	m_jitteringSwitch;
+	Fl_Light_Button* 	m_textureMappingSwitch;
 
 	TraceGLWindow*		m_traceGlWindow;
 
@@ -60,6 +61,7 @@ public:
 	int 		getAntialiasingSize();
 	bool 		isEnableFresnel();
 	bool 		isEnableJittering();
+	bool		isEnableTextureMapping();
 
 private:
 	RayTracer*	raytracer;
@@ -75,6 +77,7 @@ private:
 	int 		m_nAntialiasingSize;
 	bool 		m_bIsEnableFresnel;
 	bool 		m_bIsEnableJittering;
+	bool 		m_bIsEnableTextureMapping;
 
 // static class members
 	static Fl_Menu_Item menuitems[];
@@ -84,6 +87,7 @@ private:
 	static void cb_load_scene(Fl_Menu_* o, void* v);
 	static void cb_save_image(Fl_Menu_* o, void* v);
 	static void	cb_load_background_image(Fl_Menu_* o, void* v);
+	static void cb_load_texture_image(Fl_Menu_* o, void* v);
 	static void cb_exit(Fl_Menu_* o, void* v);
 	static void cb_about(Fl_Menu_* o, void* v);
 
@@ -100,6 +104,7 @@ private:
 	static void cb_antialiasingSlides(Fl_Widget* o, void* v);
 	static void cb_fresnelSwitch(Fl_Widget* o, void* v);
 	static void cb_jitteringSwitch(Fl_Widget* o, void* v);
+	static void cb_textureMappingSwitch(Fl_Widget* o, void* v);
 
 
 	static void cb_render(Fl_Widget* o, void* v);

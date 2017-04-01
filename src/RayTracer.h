@@ -25,7 +25,11 @@ public:
 
 	bool loadScene( char* fn );
 	void loadbackgroundImage( char* fn);
-	vec3f getbackgroundLoc(double x, double y);
+	void loadtextureMappingImage( char* fn);
+	vec3f getbackgroundColor(double x, double y);
+	vec3f gettextureColor(double x, double y);
+
+	vec3f SphereInverse(const ray& r, isect& i);
 
 	bool sceneLoaded();
 	double getFresnelCoeff(isect& i, const ray& r);
@@ -33,13 +37,14 @@ public:
 private:
 	unsigned char *backgroundImage;
 	unsigned char *buffer;
+	unsigned char *textureMappingImage;
 	int buffer_width, buffer_height;
 	int bufferSize;
 	int background_width, background_height;
+	int texture_width, texture_height;
 	Scene *scene;
 	std::map<int, Material> mediaHistory;
 	bool m_bSceneLoaded;
-	bool m_bBackgroundLoaded;
 };
 
 #endif // __RAYTRACER_H__
