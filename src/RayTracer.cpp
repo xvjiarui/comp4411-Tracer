@@ -257,6 +257,8 @@ void RayTracer::tracePixel( int i, int j )
 
 	// double x = double(i)/double(buffer_width);
 	// double y = double(j)/double(buffer_height);
+	// col = trace( scene,x,y );
+	
 	if (traceUI->isEnableJittering())
 	{
 		double jitter_x = double(rand() % 10 - 5)/10.0;
@@ -290,7 +292,6 @@ void RayTracer::tracePixel( int i, int j )
 		}
 	}
 	
-	// col = trace( scene,x,y );
 
 
 	unsigned char *pixel = buffer + ( i + j * buffer_width ) * 3;
