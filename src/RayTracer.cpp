@@ -50,108 +50,148 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 		const Material& m = i.getMaterial();
 		vec3f Intensity = m.shade(scene, r, i);
 		vec3f reflection = 2 * ((-r.getDirection().dot(i.N)) * i.N) + r.getDirection();
-		ray reflection_ray = ray(r.at(i.t), reflection.normalize());
-		Intensity += prod(m.kr,traceRay(scene, reflection_ray, vec3f(1.0,1.0,1.0), depth - 1));
-
-		vec3f conPoint = r.at(i.t); 
-		vec3f normal;
-		vec3f Rdir = 2 * (i.N*-r.getDirection()) * i.N - (-r.getDirection());
-		// Refraction part
-		// We maintain a map, this map has order so it can be simulated as a extended stack	
-		const double fresnel_coeff = getFresnelCoeff(i, r);	  
-		if (!i.getMaterial().kt.iszero())
+		if (traceUI->isEnableGlossy() && depth > 0)
 		{
-			// take account total refraction effect
-			bool TotalRefraction = false; 
-			// opposite ray
-			ray oppR(conPoint, r.getDirection()); //without refraction
-		
-			// marker to simulate a stack
-			bool toAdd = false, toErase = false;
-
-			// For now, the interior is just hardcoded
-			// That is, we judge it according to cap and whether it is box
-			if (i.obj->hasInterior())
+			vec3f glossyReflections[4];
+			if (reflection[2] > RAY_EPSILON || reflection[2] < -RAY_EPSILON)
 			{
-				// refractive index
-				double indexA, indexB;
-
-				// For ray go out of an object
-				if (i.N*r.getDirection() > RAY_EPSILON)
+				glossyReflections[0][0] = 1;
+				glossyReflections[0][1] = 1;
+				glossyReflections[0][2] = - (reflection[0] + reflection[1])/reflection[2];
+				glossyReflections[0] -= reflection;
+				float ratio = 32;
+				glossyReflections[0] = glossyReflections[0].normalize()/ratio;
+				glossyReflections[1] = glossyReflections[0].cross(reflection).normalize()/ratio;
+				glossyReflections[2] = reflection.cross(glossyReflections[0]).normalize()/ratio;
+				glossyReflections[3] = reflection.cross(glossyReflections[2]).normalize()/ratio;
+				for (int k = 0; k < 4; ++k)
 				{
-					if (mediaHistory.empty())
-					{
-						indexA = 1.0;
-					}
-					else
-					{
-						// return the refractive index of last object
-						indexA = mediaHistory.rbegin()->second.index;
-					}
+					glossyReflections[k] += reflection;
+				}
+				ray glossyReflection_rays[4] =
+				{
+					ray(r.at(i.t), glossyReflections[0].normalize()),
+					ray(r.at(i.t), glossyReflections[1].normalize()),
+					ray(r.at(i.t), glossyReflections[2].normalize()),
+					ray(r.at(i.t), glossyReflections[3].normalize())
+				};
+				for (int k = 0; k < 4; ++k)
+				{
+					Intensity += 0.2 * prod(m.kr, traceRay(scene, glossyReflection_rays[k], vec3f(1.0, 1.0, 1.0), 0));
+				}
+			}
 
-					mediaHistory.erase(i.obj->getOrder());
-					toAdd = true;
-					if (mediaHistory.empty())
+		}
+		ray reflection_ray = ray(r.at(i.t), reflection.normalize());
+		if (traceUI->isEnableGlossy() && depth > 0)
+		{
+			Intensity += 0.2 * prod(m.kr,traceRay(scene, reflection_ray, vec3f(1.0,1.0,1.0), depth - 1));
+		}
+		else Intensity += prod(m.kr,traceRay(scene, reflection_ray, vec3f(1.0,1.0,1.0), depth - 1));
+
+		if (!traceUI->isEnableGlossy())
+		{
+			vec3f conPoint = r.at(i.t); 
+			vec3f normal;
+			vec3f Rdir = 2 * (i.N*-r.getDirection()) * i.N - (-r.getDirection());
+			// Refraction part
+			// We maintain a map, this map has order so it can be simulated as a extended stack	
+			const double fresnel_coeff = getFresnelCoeff(i, r);	  
+			if (!i.getMaterial().kt.iszero())
+			{
+				// take account total refraction effect
+				bool TotalRefraction = false; 
+				// opposite ray
+				ray oppR(conPoint, r.getDirection()); //without refraction
+			
+				// marker to simulate a stack
+				bool toAdd = false, toErase = false;
+
+				// For now, the interior is just hardcoded
+				// That is, we judge it according to cap and whether it is box
+				if (i.obj->hasInterior())
+				{
+					// refractive index
+					double indexA, indexB;
+
+					// For ray go out of an object
+					if (i.N*r.getDirection() > RAY_EPSILON)
 					{
-						indexB = 1.0;
+						if (mediaHistory.empty())
+						{
+							indexA = 1.0;
+						}
+						else
+						{
+							// return the refractive index of last object
+							indexA = mediaHistory.rbegin()->second.index;
+						}
+
+						mediaHistory.erase(i.obj->getOrder());
+						toAdd = true;
+						if (mediaHistory.empty())
+						{
+							indexB = 1.0;
+						}
+						else
+						{
+							indexB = mediaHistory.rbegin()->second.index;
+						}
+						normal = -i.N;
 					}
+					// For ray get in the object
 					else
 					{
+						if (mediaHistory.empty())
+						{
+							indexA = 1.0;
+						}
+						else
+						{
+							indexA = mediaHistory.rbegin()->second.index;
+						}
+						mediaHistory.insert(make_pair(i.obj->getOrder(), i.getMaterial()));
+						toErase = true;
 						indexB = mediaHistory.rbegin()->second.index;
+						normal = i.N;
 					}
-					normal = -i.N;
-				}
-				// For ray get in the object
-				else
-				{
-					if (mediaHistory.empty())
+
+					double indexRatio = indexA / indexB;
+					double cos_i = max(min(normal*((-r.getDirection()).normalize()), 1.0), -1.0); //SYSNOTE: min(x, 1.0) to prevent cos_i becomes bigger than 1
+					double sin_i = sqrt(1 - cos_i*cos_i);
+					double sin_t = sin_i * indexRatio;
+
+					if (sin_t > 1.0)
 					{
-						indexA = 1.0;
+						TotalRefraction = true;
 					}
 					else
 					{
-						indexA = mediaHistory.rbegin()->second.index;
+						TotalRefraction = false;
+						double cos_t = sqrt(1 - sin_t*sin_t);
+						vec3f Tdir = (indexRatio*cos_i - cos_t)*normal - indexRatio*-r.getDirection();
+						oppR = ray(conPoint, Tdir);
+						if (!traceUI->isEnableFresnel()) {
+							Intensity += prod(i.getMaterial().kt, traceRay(scene, oppR, thresh, depth + 1));
+						}
+						else
+						{
+							Intensity += ((1 - fresnel_coeff)*prod(i.getMaterial().kt, traceRay(scene, oppR, thresh, depth + 1)));
+						}
 					}
+				}
+
+				if (toAdd)
+				{
 					mediaHistory.insert(make_pair(i.obj->getOrder(), i.getMaterial()));
-					toErase = true;
-					indexB = mediaHistory.rbegin()->second.index;
-					normal = i.N;
 				}
-
-				double indexRatio = indexA / indexB;
-				double cos_i = max(min(normal*((-r.getDirection()).normalize()), 1.0), -1.0); //SYSNOTE: min(x, 1.0) to prevent cos_i becomes bigger than 1
-				double sin_i = sqrt(1 - cos_i*cos_i);
-				double sin_t = sin_i * indexRatio;
-
-				if (sin_t > 1.0)
+				if (toErase)
 				{
-					TotalRefraction = true;
+					mediaHistory.erase(i.obj->getOrder());
 				}
-				else
-				{
-					TotalRefraction = false;
-					double cos_t = sqrt(1 - sin_t*sin_t);
-					vec3f Tdir = (indexRatio*cos_i - cos_t)*normal - indexRatio*-r.getDirection();
-					oppR = ray(conPoint, Tdir);
-					if (!traceUI->isEnableFresnel()) {
-						Intensity += prod(i.getMaterial().kt, traceRay(scene, oppR, thresh, depth + 1));
-					}
-					else
-					{
-						Intensity += ((1 - fresnel_coeff)*prod(i.getMaterial().kt, traceRay(scene, oppR, thresh, depth + 1)));
-					}
-				}
-			}
-
-			if (toAdd)
-			{
-				mediaHistory.insert(make_pair(i.obj->getOrder(), i.getMaterial()));
-			}
-			if (toErase)
-			{
-				mediaHistory.erase(i.obj->getOrder());
 			}
 		}
+		
 		return Intensity;
 	
 	} else {

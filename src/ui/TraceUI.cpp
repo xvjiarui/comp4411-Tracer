@@ -166,6 +166,11 @@ void TraceUI::cb_textureMappingSwitch(Fl_Widget* o, void* v)
 	((TraceUI*)(o->user_data()))->m_bIsEnableTextureMapping ^= true;
 }
 
+void TraceUI::cb_glossySwitch(Fl_Widget* o, void* v)
+{
+	((TraceUI*)(o->user_data()))->m_bIsEnableGlossy ^= true;
+}
+
 void TraceUI::cb_render(Fl_Widget* o, void* v)
 {
 	char buffer[256];
@@ -318,6 +323,11 @@ bool TraceUI::isEnableTextureMapping()
 {
 	return m_bIsEnableTextureMapping;
 }
+
+bool TraceUI::isEnableGlossy()
+{
+	return m_bIsEnableGlossy;
+}
 // menu definition
 Fl_Menu_Item TraceUI::menuitems[] = {
 	{ "&File",		0, 0, 0, FL_SUBMENU },
@@ -349,6 +359,7 @@ TraceUI::TraceUI() {
 	m_bIsEnableFresnel = false;
 	m_bIsEnableJittering = false;
 	m_bIsEnableTextureMapping = false;
+	m_bIsEnableGlossy = false;
 	m_mainWindow = new Fl_Window(100, 40, 400, 350, "Ray <Not Loaded>");
 		m_mainWindow->user_data((void*)(this));	// record self to be used by static callback functions
 		// install menu bar
@@ -491,10 +502,15 @@ TraceUI::TraceUI() {
 		m_jitteringSwitch->value(0);
 		m_jitteringSwitch->callback(cb_jitteringSwitch);
 
-		m_textureMappingSwitch = new Fl_Light_Button(70, 255, 70, 25, "Texture");
+		m_textureMappingSwitch = new Fl_Light_Button(80, 255, 70, 25, "Texture");
 		m_textureMappingSwitch->user_data((void*)(this));
 		m_textureMappingSwitch->value(0);
 		m_textureMappingSwitch->callback(cb_textureMappingSwitch);
+
+		m_glossySwitch = new Fl_Light_Button(80, 280, 70, 25, "Glossy");
+		m_glossySwitch->user_data((void*)(this));
+		m_glossySwitch->value(0);
+		m_glossySwitch->callback(cb_glossySwitch);
 
 		m_mainWindow->callback(cb_exit2);
 		m_mainWindow->when(FL_HIDE);

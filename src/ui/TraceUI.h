@@ -42,6 +42,7 @@ public:
 	Fl_Light_Button*	m_fresnelSwitch;
 	Fl_Light_Button* 	m_jitteringSwitch;
 	Fl_Light_Button* 	m_textureMappingSwitch;
+	Fl_Light_Button* 	m_glossySwitch;
 
 	TraceGLWindow*		m_traceGlWindow;
 
@@ -62,6 +63,7 @@ public:
 	bool 		isEnableFresnel();
 	bool 		isEnableJittering();
 	bool		isEnableTextureMapping();
+	bool 		isEnableGlossy();
 
 private:
 	RayTracer*	raytracer;
@@ -78,6 +80,7 @@ private:
 	bool 		m_bIsEnableFresnel;
 	bool 		m_bIsEnableJittering;
 	bool 		m_bIsEnableTextureMapping;
+	bool 		m_bIsEnableGlossy;
 
 // static class members
 	static Fl_Menu_Item menuitems[];
@@ -105,6 +108,7 @@ private:
 	static void cb_fresnelSwitch(Fl_Widget* o, void* v);
 	static void cb_jitteringSwitch(Fl_Widget* o, void* v);
 	static void cb_textureMappingSwitch(Fl_Widget* o, void* v);
+	static void cb_glossySwitch(Fl_Widget* o, void* v);
 
 
 	static void cb_render(Fl_Widget* o, void* v);
