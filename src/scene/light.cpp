@@ -27,6 +27,7 @@ vec3f DirectionalLight::shadowAttenuation( const vec3f& P ) const
 	{
 		//if not transparent return black
 		if (isecP.getMaterial().kt.iszero()) return vec3f(0, 0, 0);
+		if (ret[0] < 0.004 && ret[1] < 0.004 && ret[2] < 0.004) return vec3f(0, 0, 0);
 		//use current intersection point as new light source
 		curP = r.at(isecP.t);
 		r = ray(curP, d);

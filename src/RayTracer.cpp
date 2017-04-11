@@ -191,7 +191,7 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				}
 			}
 		}
-		if (Intensity.length() < thresh.length())
+		if (Intensity.length() < thresh.length() && depth == 0)
 		{
 			return vec3f(0, 0, 0);
 		}
