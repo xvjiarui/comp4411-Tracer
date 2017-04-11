@@ -1,9 +1,9 @@
 ﻿  RayTracer.cpp
 \\mac\home\documents\c++\comp4411\project\project3\rayskels17\src\fileio/parse.h(180): warning C4018: '<': signed/unsigned mismatch
-src\RayTracer.cpp(311): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-src\RayTracer.cpp(312): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-src\RayTracer.cpp(328): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
-src\RayTracer.cpp(329): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+src\RayTracer.cpp(314): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+src\RayTracer.cpp(315): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+src\RayTracer.cpp(331): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
+src\RayTracer.cpp(332): warning C4244: 'initializing': conversion from 'double' to 'int', possible loss of data
 fltk.lib(case.obj) : warning LNK4204: '\\Mac\Home\Documents\C++\COMP4411\Project\Project3\RaySkelS17\Release\vc140.pdb' is missing debugging information for referencing module; linking object as if no debug info
 fltk.lib(filename_absolute.obj) : warning LNK4204: '\\Mac\Home\Documents\C++\COMP4411\Project\Project3\RaySkelS17\Release\vc140.pdb' is missing debugging information for referencing module; linking object as if no debug info
 fltk.lib(filename_expand.obj) : warning LNK4204: '\\Mac\Home\Documents\C++\COMP4411\Project\Project3\RaySkelS17\Release\vc140.pdb' is missing debugging information for referencing module; linking object as if no debug info

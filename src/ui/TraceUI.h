@@ -35,6 +35,7 @@ public:
 	Fl_Slider* 			m_IntensitySlider;
 	Fl_Slider* 			m_DistanceSlider;
 	Fl_Slider* 			m_AntialiasingSlider;
+	Fl_Slider* 			m_ThresholdSlider;
 
 	Fl_Button*			m_renderButton;
 	Fl_Button*			m_stopButton;
@@ -60,6 +61,7 @@ public:
 	int 		getIntensity();
 	double		getDistance();
 	int 		getAntialiasingSize();
+	double 		getThreshold();
 	bool 		isEnableFresnel();
 	bool 		isEnableJittering();
 	bool		isEnableTextureMapping();
@@ -77,6 +79,7 @@ private:
 	int 		m_nIntensity;
 	double 		m_nDistance;
 	int 		m_nAntialiasingSize;
+	double 		m_dThreshold;
 	bool 		m_bIsEnableFresnel;
 	bool 		m_bIsEnableJittering;
 	bool 		m_bIsEnableTextureMapping;
@@ -105,6 +108,7 @@ private:
 	static void cb_intensitySlides(Fl_Widget* o, void* v);
 	static void cb_distanceSlides(Fl_Widget* o, void* v);
 	static void cb_antialiasingSlides(Fl_Widget* o, void* v);
+	static void cb_thresholdSlides(Fl_Widget* o, void* v);
 	static void cb_fresnelSwitch(Fl_Widget* o, void* v);
 	static void cb_jitteringSwitch(Fl_Widget* o, void* v);
 	static void cb_textureMappingSwitch(Fl_Widget* o, void* v);

@@ -146,6 +146,12 @@ void TraceUI::cb_antialiasingSlides(Fl_Widget* o, void* v)
 	pUI->m_nAntialiasingSize=int( ((Fl_Slider *)o)->value() ) ;
 }
 
+void TraceUI::cb_thresholdSlides(Fl_Widget* o, void* v)
+{
+	TraceUI* pUI = (TraceUI*)(o->user_data());
+	pUI->m_dThreshold=double( ((Fl_Slider *)o)->value() ) ;
+}
+
 void TraceUI::cb_depthSlides(Fl_Widget* o, void* v)
 {
 	((TraceUI*)(o->user_data()))->m_nDepth=int( ((Fl_Slider *)o)->value() ) ;
@@ -309,6 +315,11 @@ int TraceUI::getAntialiasingSize()
 	return m_nAntialiasingSize;
 }
 
+double TraceUI::getThreshold()
+{
+	return m_dThreshold;
+}
+
 bool TraceUI::isEnableFresnel()
 {
 	return m_bIsEnableFresnel;
@@ -356,6 +367,7 @@ TraceUI::TraceUI() {
 	m_nIntensity = 1;
 	m_nDistance = 1.87;
 	m_nAntialiasingSize = 0;
+	m_dThreshold = 0.0;
 	m_bIsEnableFresnel = false;
 	m_bIsEnableJittering = false;
 	m_bIsEnableTextureMapping = false;
@@ -483,6 +495,19 @@ TraceUI::TraceUI() {
 		m_AntialiasingSlider->align(FL_ALIGN_RIGHT);
 		m_AntialiasingSlider->callback(cb_antialiasingSlides);
 
+		// install slider size
+		m_ThresholdSlider = new Fl_Value_Slider(10, 255, 180, 20, "Threshold");
+		m_ThresholdSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_ThresholdSlider->type(FL_HOR_NICE_SLIDER);
+        m_ThresholdSlider->labelfont(FL_COURIER);
+        m_ThresholdSlider->labelsize(12);
+		m_ThresholdSlider->minimum(0.0);
+		m_ThresholdSlider->maximum(1.0);
+		m_ThresholdSlider->step(0.01);
+		m_ThresholdSlider->value(m_dThreshold);
+		m_ThresholdSlider->align(FL_ALIGN_RIGHT);
+		m_ThresholdSlider->callback(cb_thresholdSlides);
+
 
 		m_renderButton = new Fl_Button(240, 27, 70, 25, "&Render");
 		m_renderButton->user_data((void*)(this));
@@ -492,22 +517,22 @@ TraceUI::TraceUI() {
 		m_stopButton->user_data((void*)(this));
 		m_stopButton->callback(cb_stop);
 
-		m_fresnelSwitch = new Fl_Light_Button(10, 255, 70, 25, "Fresnel");
+		m_fresnelSwitch = new Fl_Light_Button(10, 280, 70, 25, "Fresnel");
 		m_fresnelSwitch->user_data((void*)(this));
 		m_fresnelSwitch->value();
 		m_fresnelSwitch->callback(cb_fresnelSwitch);
 
-		m_jitteringSwitch = new Fl_Light_Button(10, 280, 70, 25, "Jittering");
+		m_jitteringSwitch = new Fl_Light_Button(10, 305, 70, 25, "Jittering");
 		m_jitteringSwitch->user_data((void*)(this));
 		m_jitteringSwitch->value(0);
 		m_jitteringSwitch->callback(cb_jitteringSwitch);
 
-		m_textureMappingSwitch = new Fl_Light_Button(80, 255, 70, 25, "Texture");
+		m_textureMappingSwitch = new Fl_Light_Button(80, 280, 70, 25, "Texture");
 		m_textureMappingSwitch->user_data((void*)(this));
 		m_textureMappingSwitch->value(0);
 		m_textureMappingSwitch->callback(cb_textureMappingSwitch);
 
-		m_glossySwitch = new Fl_Light_Button(80, 280, 70, 25, "Glossy");
+		m_glossySwitch = new Fl_Light_Button(80, 305, 70, 25, "Glossy");
 		m_glossySwitch->user_data((void*)(this));
 		m_glossySwitch->value(0);
 		m_glossySwitch->callback(cb_glossySwitch);

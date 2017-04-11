@@ -21,7 +21,7 @@ vec3f RayTracer::trace( Scene *scene, double x, double y )
 {
     ray r( vec3f(0,0,0), vec3f(0,0,0) );
     scene->getCamera()->rayThrough( x,y,r );
-	return traceRay( scene, r, vec3f(1.0,1.0,1.0), traceUI->getDepth() ).clamp();
+	return traceRay( scene, r, vec3f(traceUI->getThreshold(),traceUI->getThreshold(),traceUI->getThreshold()), traceUI->getDepth() ).clamp();
 }
 
 // Do recursive ray tracing!  You'll want to insert a lot of code here
@@ -191,7 +191,10 @@ vec3f RayTracer::traceRay( Scene *scene, const ray& r,
 				}
 			}
 		}
-		
+		if (Intensity.length() < thresh.length())
+		{
+			return vec3f(0, 0, 0);
+		}
 		return Intensity;
 	
 	} else {
